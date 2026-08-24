@@ -1,6 +1,7 @@
-import { LEVEL_CONFIG } from "./config";
+import { LEVEL_CONFIG, SCORING_CONFIG } from "./config";
 import { createInput } from "./input";
 import { draw } from "./render";
+import { createSoundEngine } from "./sound";
 import { createWorld, releaseCharge, startCharge, tick } from "./state";
 import type { World } from "./types";
 
@@ -17,6 +18,7 @@ export function init(elements: GameElements): void {
   const context = canvas.getContext("2d");
   if (!context) return;
   const ctx: CanvasRenderingContext2D = context;
+  const sound = createSoundEngine();
 
   let logicalHeight = LEVEL_CONFIG.logicalWidth;
 
@@ -44,14 +46,24 @@ export function init(elements: GameElements): void {
     }
   }
 
-  createInput({
-    onChargeStart: () => {
-      world = startCharge(world, performance.now());
+  createInput(
+    {
+      onChargeStart: () => {
+        const wasCharging = world.chargeStartMs !== null;
+        world = startCharge(world, performance.now());
+        if (!wasCharging && world.chargeStartMs !== null) sound.startCharge();
+      },
+      onChargeEnd: () => {
+        const wasCharging = world.chargeStartMs !== null;
+        world = releaseCharge(world, performance.now());
+        if (wasCharging) {
+          sound.stopCharge();
+          sound.playJump();
+        }
+      },
     },
-    onChargeEnd: () => {
-      world = releaseCharge(world, performance.now());
-    },
-  });
+    canvas,
+  );
 
   restartBtn.addEventListener("click", () => {
     world = createWorld();
@@ -60,7 +72,22 @@ export function init(elements: GameElements): void {
 
   function frame(): void {
     const now = performance.now();
+
+    if (world.chargeStartMs !== null) {
+      sound.updateCharge(now - world.chargeStartMs);
+    }
+
+    const priorFlight = world.flight;
     world = tick(world, now);
+
+    if (priorFlight && !world.flight) {
+      if (priorFlight.landed) {
+        sound.playLand(priorFlight.accuracy >= SCORING_CONFIG.centerAccuracyThreshold);
+      } else {
+        sound.playFail();
+      }
+    }
+
     draw(ctx, world, now, LEVEL_CONFIG.logicalWidth, logicalHeight);
     syncOverlay();
     requestAnimationFrame(frame);
