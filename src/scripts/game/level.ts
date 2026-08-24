@@ -1,9 +1,13 @@
+import { CHARGE_CONFIG } from "./config";
 import type { LevelConfig } from "./config";
 import type { Platform } from "./types";
 
-function lerp(from: number, to: number, t: number): number {
-  return from + (to - from) * t;
-}
+// A jump's hold-time tolerance window is width / pxPerMs (see
+// spec/level-fairness.test.ts) — below this, a human can't reliably release
+// within the window that lands on the platform. Configs are chosen so
+// widthMin itself already clears this floor; drawReachableWidth is a safety
+// net for that guarantee, not something real configs rely on.
+const MIN_WINDOW_MS = 100;
 
 // mulberry32: small, fast, seeded PRNG — same seed always produces the same
 // sequence, so a level can be reproduced exactly for testing, while real
@@ -18,13 +22,23 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-// Each gap is drawn independently, uniformly at random from
-// [config.gapMin, config.gapMax] — different every platform, so the player
-// can't memorize a fixed jump distance. Only the gap is randomized, never
-// the width, so the width-derived fairness proof in
-// spec/level-fairness.test.ts (a jump's hold-time tolerance window depends
-// only on the target platform's width, not on the gap that precedes it)
-// holds for any gap drawn from this range. The level is generated once, up
+// Draws a width uniformly from [config.widthMin, config.widthMax], but never
+// hands back one whose hold-time window would fall under the human-releasable
+// floor — redraws instead, per the brief's "if a randomly generated platform
+// is unreachable, regenerate it rather than placing an impossible platform."
+// Bounded attempts, falling back to the range's most generous width, so a
+// hypothetical config whose whole range sits under the floor can't loop forever.
+function drawReachableWidth(rng: () => number, config: LevelConfig): number {
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const width = config.widthMin + rng() * (config.widthMax - config.widthMin);
+    if (width / CHARGE_CONFIG.pxPerMs >= MIN_WINDOW_MS) return width;
+  }
+  return config.widthMax;
+}
+
+// Both width and gap are drawn independently and uniformly at random for
+// every platform — no linear progression — so no two playthroughs (and no
+// two platforms within one) look alike. The level is generated once, up
 // front, from a seed — never re-rolled mid-playthrough — so a given seed
 // always reproduces the exact same level.
 export function generateLevel(config: LevelConfig, seed: number): Platform[] {
@@ -33,8 +47,7 @@ export function generateLevel(config: LevelConfig, seed: number): Platform[] {
   let x = 0;
 
   for (let i = 0; i < config.count; i++) {
-    const t = config.count === 1 ? 0 : i / (config.count - 1);
-    const width = lerp(config.widthStart, config.widthEnd, t);
+    const width = drawReachableWidth(rng, config);
 
     if (i > 0) {
       const gap = config.gapMin + rng() * (config.gapMax - config.gapMin);

@@ -10,12 +10,17 @@ function gapsOf(platforms: { x: number; width: number }[]): number[] {
   return gaps;
 }
 
-// The brief: each mode draws its gaps randomly from a fixed range so the
-// player can't memorize a jump distance, but generation must still be
-// controlled — every gap within the configured range, the level fixed at
-// creation time (not re-rolled mid-run), and reproducible from a seed for
-// testing even though real playthroughs vary.
-describe("random platform gaps", () => {
+function widthsOf(platforms: { width: number }[]): number[] {
+  return platforms.map((p) => p.width);
+}
+
+// The brief: each mode draws its width and gap randomly from fixed ranges so
+// the player can't memorize a fixed jump distance or a predictable pattern,
+// but generation must still be controlled — every value within its
+// configured range, the level fixed at creation time (not re-rolled
+// mid-run), and reproducible from a seed for testing even though real
+// playthroughs vary.
+describe("random platform generation", () => {
   const modes = Object.entries(LEVEL_CONFIGS);
 
   for (const [mode, config] of modes) {
@@ -28,10 +33,30 @@ describe("random platform gaps", () => {
         }
       });
 
+      it(`draws every width within the configured ${config.widthMin}-${config.widthMax}px range`, () => {
+        const platforms = generateLevel(config, 7);
+        for (const width of widthsOf(platforms)) {
+          expect(width).toBeGreaterThanOrEqual(config.widthMin);
+          expect(width).toBeLessThanOrEqual(config.widthMax);
+        }
+      });
+
       it("varies the gap from platform to platform instead of using one fixed distance", () => {
         const gaps = gapsOf(generateLevel(config, 7));
         const distinct = new Set(gaps.map((g) => g.toFixed(4)));
         expect(distinct.size).toBeGreaterThan(1);
+      });
+
+      it("varies the width from platform to platform instead of a fixed or linear progression", () => {
+        const widths = widthsOf(generateLevel(config, 7));
+        const distinct = new Set(widths.map((w) => w.toFixed(4)));
+        expect(distinct.size).toBeGreaterThan(1);
+      });
+
+      it("does not shrink the width monotonically across the level", () => {
+        const widths = widthsOf(generateLevel(config, 7));
+        const increases = widths.slice(1).filter((w, i) => w > widths[i]).length;
+        expect(increases).toBeGreaterThan(0);
       });
 
       it("reproduces the exact same level from the same seed", () => {
@@ -48,12 +73,21 @@ describe("random platform gaps", () => {
     });
   }
 
+  it("matches the brief's per-difficulty width ranges", () => {
+    expect(LEVEL_CONFIGS.easy.widthMin).toBe(50);
+    expect(LEVEL_CONFIGS.easy.widthMax).toBe(90);
+    expect(LEVEL_CONFIGS.medium.widthMin).toBe(40);
+    expect(LEVEL_CONFIGS.medium.widthMax).toBe(80);
+    expect(LEVEL_CONFIGS.hard.widthMin).toBe(30);
+    expect(LEVEL_CONFIGS.hard.widthMax).toBe(70);
+  });
+
   it("matches the brief's per-difficulty gap ranges", () => {
-    expect(LEVEL_CONFIGS.easy.gapMin).toBe(60);
-    expect(LEVEL_CONFIGS.easy.gapMax).toBe(100);
-    expect(LEVEL_CONFIGS.medium.gapMin).toBe(80);
-    expect(LEVEL_CONFIGS.medium.gapMax).toBe(140);
-    expect(LEVEL_CONFIGS.hard.gapMin).toBe(120);
-    expect(LEVEL_CONFIGS.hard.gapMax).toBe(160);
+    expect(LEVEL_CONFIGS.easy.gapMin).toBe(50);
+    expect(LEVEL_CONFIGS.easy.gapMax).toBe(90);
+    expect(LEVEL_CONFIGS.medium.gapMin).toBe(70);
+    expect(LEVEL_CONFIGS.medium.gapMax).toBe(120);
+    expect(LEVEL_CONFIGS.hard.gapMin).toBe(90);
+    expect(LEVEL_CONFIGS.hard.gapMax).toBe(140);
   });
 });

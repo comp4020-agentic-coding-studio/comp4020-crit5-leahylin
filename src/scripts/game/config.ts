@@ -13,22 +13,24 @@ export const LOGICAL_WIDTH = 400; // logical viewport width; canvas scales this 
 
 export interface LevelConfig {
   count: number;
-  widthStart: number;
-  widthEnd: number;
+  widthMin: number; // px, inclusive lower bound of each platform's random width
+  widthMax: number; // px, inclusive upper bound of each platform's random width
   gapMin: number; // px, inclusive lower bound of each platform's random gap
   gapMax: number; // px, inclusive upper bound of each platform's random gap
 }
 
-// widthEnd * CHARGE_CONFIG.pxPerMs must stay comfortably above the 100ms
+// widthMin * CHARGE_CONFIG.pxPerMs must stay at or above the 100ms
 // human-releasable floor asserted in spec/level-fairness.test.ts — easy
-// 233ms, medium 153ms, hard 113ms. gapMin/gapMax are the per-mode ranges a
-// gap is randomly drawn from at level-generation time (see level.ts) — they
-// only ever shift the required hold-time, never the width-derived tolerance
-// window, so the fairness proof holds for any gap drawn from this range.
+// 167ms, medium 133ms, hard exactly 100ms — since every platform's width is
+// now drawn independently from [widthMin, widthMax] (see level.ts), the
+// floor has to hold for the smallest width the range can produce, not just
+// an end-of-level value. gapMin/gapMax are the per-mode ranges a gap is
+// randomly drawn from at level-generation time — they only ever shift the
+// required hold-time, never the width-derived tolerance window.
 export const LEVEL_CONFIGS: Record<DifficultyMode, LevelConfig> = {
-  easy: { count: 20, widthStart: 110, widthEnd: 70, gapMin: 60, gapMax: 100 },
-  medium: { count: 25, widthStart: 90, widthEnd: 46, gapMin: 80, gapMax: 140 },
-  hard: { count: 30, widthStart: 80, widthEnd: 34, gapMin: 120, gapMax: 160 },
+  easy: { count: 20, widthMin: 50, widthMax: 90, gapMin: 50, gapMax: 90 },
+  medium: { count: 30, widthMin: 40, widthMax: 80, gapMin: 70, gapMax: 120 },
+  hard: { count: 30, widthMin: 30, widthMax: 70, gapMin: 90, gapMax: 140 },
 };
 
 export const DEFAULT_MODE: DifficultyMode = "easy";
