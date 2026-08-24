@@ -35,7 +35,10 @@ export const DEFAULT_MODE: DifficultyMode = "easy";
 
 export const FLIGHT_CONFIG = {
   durationMs: 380, // fixed cosmetic arc time, independent of distance
-  fallDurationMs: 500, // extra cosmetic fall time after a miss, before LOST
+  // Extra cosmetic fall time after a miss, before LOST — long enough (with
+  // the arc, ~1.2s total) that the player visibly sees themselves fall
+  // through the gap before Game Over appears, short enough to stay snappy.
+  fallDurationMs: 800,
 };
 
 export const PLAYER_SIZE = { width: 22, height: 22 };

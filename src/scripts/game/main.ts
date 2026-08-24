@@ -85,8 +85,9 @@ export function init(elements: GameElements): void {
     if (ended) {
       if (!resultsFinalized) finalizeResults();
       const won = world.state === "WON";
-      overlayMessageEl.textContent = won ? "YOU MADE IT!" : "Missed.";
+      overlayMessageEl.textContent = won ? "YOU MADE IT!" : "GAME OVER";
       overlayMessageEl.classList.toggle("won", won);
+      overlayMessageEl.classList.toggle("lost", !won);
       newBestEl.hidden = !isNewBest;
       statScoreEl.textContent = String(world.score);
       statBestEl.textContent = String(bestScore);

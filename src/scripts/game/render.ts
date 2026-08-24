@@ -24,6 +24,10 @@ const POPUP_CENTER_COLOR = "255, 214, 102"; // brighter/warmer for a precise lan
 const POPUP_EDGE_COLOR = "230, 230, 230";
 const COMBO_LABEL_OFFSET = 14; // sits just above the points text, same fade
 
+const MISS_SHAKE_DURATION_MS = 320; // a brief jolt right as the miss registers, not the whole fall
+const MISS_SHAKE_MAGNITUDE_PX = 4;
+const MISS_FADE_MAX_ALPHA = 0.35; // scene dims toward this as the fall plays out, never to black
+
 export function draw(
   ctx: CanvasRenderingContext2D,
   world: World,
@@ -34,8 +38,19 @@ export function draw(
   const baselineY = logicalHeight * BASELINE_FRACTION;
   const { x: playerX, y: playerY, squishX, squishY } = playerPose(world, nowMs, baselineY);
   const cameraX = Math.max(0, playerX - logicalWidth * ANCHOR_FRACTION);
+  const isMissFlight = world.flight?.outcome === "missed";
+  const missElapsed = isMissFlight ? nowMs - world.flight!.startMs : 0;
 
   ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+
+  ctx.save();
+  if (isMissFlight) {
+    const shakeT = clamp(1 - missElapsed / MISS_SHAKE_DURATION_MS, 0, 1);
+    ctx.translate(
+      Math.sin(missElapsed * 0.09) * MISS_SHAKE_MAGNITUDE_PX * shakeT,
+      Math.cos(missElapsed * 0.13) * MISS_SHAKE_MAGNITUDE_PX * 0.6 * shakeT,
+    );
+  }
 
   ctx.fillStyle = PLATFORM_COLOR;
   for (const platform of world.platforms) {
@@ -62,6 +77,14 @@ export function draw(
   );
   ctx.fill();
   ctx.restore();
+
+  ctx.restore(); // undoes the shake translate — the fade below stays put
+
+  if (isMissFlight) {
+    const fadeT = clamp(missElapsed / (FLIGHT_CONFIG.durationMs + FLIGHT_CONFIG.fallDurationMs), 0, 1);
+    ctx.fillStyle = `rgba(0, 0, 0, ${fadeT * MISS_FADE_MAX_ALPHA})`;
+    ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+  }
 }
 
 interface Pose {
