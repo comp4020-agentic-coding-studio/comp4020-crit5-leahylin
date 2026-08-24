@@ -1,16 +1,96 @@
+html,
 body {
+  height: 100%;
   margin: 0;
-  padding: 2rem;
   font-family: system-ui, sans-serif;
-  line-height: 1.6;
-  color: #1a1a1a;
+  background: linear-gradient(180deg, #1b2434 0%, #0d1220 100%);
+  color: #f4f4f4;
+  overscroll-behavior: none;
+}
+
+header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 2;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+nav a {
+  color: rgba(244, 244, 244, 0.55);
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: rgba(244, 244, 244, 0.85);
 }
 
 main {
-  max-width: 40rem;
-  margin: 0 auto;
+  position: relative;
+  height: 100%;
 }
 
-a {
-  color: #0b5fff;
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+#score {
+  position: absolute;
+  top: 5rem;
+  left: 6rem;
+  font-size: 3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: rgba(244, 244, 244, 0.9);
+  z-index: 1;
+}
+
+#overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(10, 13, 20, 0.55);
+}
+
+#overlay[hidden] {
+  display: none;
+}
+
+#overlay-message {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #f4f4f4;
+}
+
+#restart {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 999px;
+  background: #ffb454;
+  color: #1b2434;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#restart:hover {
+  background: #ffc478;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
