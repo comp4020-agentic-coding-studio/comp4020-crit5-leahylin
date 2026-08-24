@@ -50,6 +50,41 @@ main {
   z-index: 1;
 }
 
+#difficulty {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1;
+  display: flex;
+  gap: 0.5rem;
+}
+
+#difficulty[hidden] {
+  display: none;
+}
+
+.difficulty-btn {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid rgba(244, 244, 244, 0.35);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(244, 244, 244, 0.7);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.difficulty-btn:hover {
+  border-color: rgba(244, 244, 244, 0.6);
+  color: #f4f4f4;
+}
+
+.difficulty-btn.selected {
+  border-color: #ffb454;
+  background: #ffb454;
+  color: #1b2434;
+}
+
 #overlay {
   position: absolute;
   inset: 0;

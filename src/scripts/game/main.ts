@@ -1,49 +1,74 @@
-import { LEVEL_CONFIG, SCORING_CONFIG } from "./config";
+import { CENTER_ACCURACY_THRESHOLDS, DEFAULT_MODE, LOGICAL_WIDTH } from "./config";
 import { createInput } from "./input";
 import { draw } from "./render";
 import { createSoundEngine } from "./sound";
 import { createWorld, releaseCharge, startCharge, tick } from "./state";
-import type { World } from "./types";
+import type { DifficultyMode, World } from "./types";
 
 export interface GameElements {
   canvas: HTMLCanvasElement;
   scoreEl: HTMLElement;
+  difficultyEl: HTMLElement;
   overlayEl: HTMLElement;
   overlayMessageEl: HTMLElement;
   restartBtn: HTMLButtonElement;
 }
 
 export function init(elements: GameElements): void {
-  const { canvas, scoreEl, overlayEl, overlayMessageEl, restartBtn } = elements;
+  const { canvas, scoreEl, difficultyEl, overlayEl, overlayMessageEl, restartBtn } = elements;
   const context = canvas.getContext("2d");
   if (!context) return;
   const ctx: CanvasRenderingContext2D = context;
   const sound = createSoundEngine();
+  const difficultyButtons = Array.from(difficultyEl.querySelectorAll<HTMLButtonElement>("button"));
 
-  let logicalHeight = LEVEL_CONFIG.logicalWidth;
+  let logicalHeight = LOGICAL_WIDTH;
 
   function resize(): void {
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = Math.round(rect.width * dpr);
     canvas.height = Math.round(rect.height * dpr);
-    logicalHeight = (rect.height / rect.width) * LEVEL_CONFIG.logicalWidth;
-    const scale = canvas.width / LEVEL_CONFIG.logicalWidth;
+    logicalHeight = (rect.height / rect.width) * LOGICAL_WIDTH;
+    const scale = canvas.width / LOGICAL_WIDTH;
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
   }
 
   window.addEventListener("resize", resize);
   resize();
 
-  let world: World = createWorld();
+  let mode: DifficultyMode = DEFAULT_MODE;
+  let world: World = createWorld(mode);
 
-  function syncOverlay(): void {
+  function syncUI(): void {
     scoreEl.textContent = String(world.score);
+
     const ended = world.state === "WON" || world.state === "LOST";
     overlayEl.hidden = !ended;
     if (ended) {
       overlayMessageEl.textContent = world.state === "WON" ? "You made it." : "Missed.";
     }
+
+    difficultyEl.hidden = world.state !== "START";
+    for (const btn of difficultyButtons) {
+      const isSelected = btn.dataset.mode === mode;
+      btn.classList.toggle("selected", isSelected);
+      btn.setAttribute("aria-pressed", String(isSelected));
+    }
+  }
+
+  function selectMode(next: DifficultyMode): void {
+    if (world.state !== "START") return;
+    mode = next;
+    world = createWorld(mode);
+    syncUI();
+  }
+
+  for (const btn of difficultyButtons) {
+    btn.addEventListener("click", () => {
+      const next = btn.dataset.mode as DifficultyMode;
+      selectMode(next);
+    });
   }
 
   createInput(
@@ -66,8 +91,8 @@ export function init(elements: GameElements): void {
   );
 
   restartBtn.addEventListener("click", () => {
-    world = createWorld();
-    syncOverlay();
+    world = createWorld(mode);
+    syncUI();
   });
 
   function frame(): void {
@@ -81,15 +106,15 @@ export function init(elements: GameElements): void {
     world = tick(world, now);
 
     if (priorFlight && !world.flight) {
-      if (priorFlight.landed) {
-        sound.playLand(priorFlight.accuracy >= SCORING_CONFIG.centerAccuracyThreshold);
+      if (priorFlight.outcome === "stayed" || priorFlight.outcome === "advanced") {
+        sound.playLand(priorFlight.accuracy >= CENTER_ACCURACY_THRESHOLDS[world.mode]);
       } else {
         sound.playFail();
       }
     }
 
-    draw(ctx, world, now, LEVEL_CONFIG.logicalWidth, logicalHeight);
-    syncOverlay();
+    draw(ctx, world, now, LOGICAL_WIDTH, logicalHeight);
+    syncUI();
     requestAnimationFrame(frame);
   }
 

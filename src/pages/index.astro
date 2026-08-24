@@ -32,6 +32,11 @@ import "../styles/styles.css";
       <h1 class="visually-hidden">Leap</h1>
       <canvas id="game" aria-label="Jumping game"></canvas>
       <div id="score" aria-hidden="true">0</div>
+      <div id="difficulty" role="group" aria-label="Difficulty">
+        <button type="button" class="difficulty-btn" data-mode="easy" aria-pressed="true">Easy</button>
+        <button type="button" class="difficulty-btn" data-mode="medium" aria-pressed="false">Medium</button>
+        <button type="button" class="difficulty-btn" data-mode="hard" aria-pressed="false">Hard</button>
+      </div>
       <div id="overlay" hidden>
         <p id="overlay-message"></p>
         <button id="restart" type="button">Restart</button>

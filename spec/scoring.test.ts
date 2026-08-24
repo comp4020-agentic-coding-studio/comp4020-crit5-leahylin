@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { SCORING_CONFIG } from "../src/scripts/game/config";
+import { CENTER_ACCURACY_THRESHOLDS, SCORE_POINTS } from "../src/scripts/game/config";
 import { tick } from "../src/scripts/game/state";
-import type { World } from "../src/scripts/game/types";
+import type { DifficultyMode, World } from "../src/scripts/game/types";
 
 // Landing accuracy (from resolveJump) is 1 - |landingX - center| / (width / 2),
-// so accuracy >= 0.8 is exactly "within 10% of the platform's width from its
-// center" — the precision bar the spec sets for the +2 bonus.
-function worldWithLanding(accuracy: number): World {
+// so accuracy >= CENTER_ACCURACY_THRESHOLDS[mode] is exactly "within that
+// mode's center-scoring zone" — the per-difficulty precision bar for +2.
+function worldWithLanding(mode: DifficultyMode, accuracy: number): World {
   return {
     state: "PLAYING",
+    mode,
     platforms: [
       { x: 0, width: 100 },
       { x: 200, width: 100 },
@@ -23,21 +24,34 @@ function worldWithLanding(accuracy: number): World {
       toX: 250,
       startMs: 0,
       durationMs: 10,
-      landed: true,
+      outcome: "advanced",
       accuracy,
-      targetPlatformIndex: 1,
+      landedIndex: 1,
     },
   };
 }
 
 describe("scoring", () => {
-  it("awards +2 for landing within 10% of the platform's width from its center", () => {
-    const result = tick(worldWithLanding(0.8), 100);
-    expect(result.score).toBe(SCORING_CONFIG.centerScore);
-  });
+  const modes: DifficultyMode[] = ["easy", "medium", "hard"];
 
-  it("awards +1 for landing further than 10% of the platform's width from its center", () => {
-    const result = tick(worldWithLanding(0.79), 100);
-    expect(result.score).toBe(SCORING_CONFIG.edgeScore);
+  for (const mode of modes) {
+    const threshold = CENTER_ACCURACY_THRESHOLDS[mode];
+
+    describe(mode, () => {
+      it(`awards +2 for landing within the ${mode} center-scoring zone`, () => {
+        const result = tick(worldWithLanding(mode, threshold), 100);
+        expect(result.score).toBe(SCORE_POINTS.centerScore);
+      });
+
+      it(`awards +1 for landing outside the ${mode} center-scoring zone`, () => {
+        const result = tick(worldWithLanding(mode, threshold - 0.01), 100);
+        expect(result.score).toBe(SCORE_POINTS.edgeScore);
+      });
+    });
+  }
+
+  it("makes harder modes require more precision (smaller center-scoring zone)", () => {
+    expect(CENTER_ACCURACY_THRESHOLDS.easy).toBeLessThan(CENTER_ACCURACY_THRESHOLDS.medium);
+    expect(CENTER_ACCURACY_THRESHOLDS.medium).toBeLessThan(CENTER_ACCURACY_THRESHOLDS.hard);
   });
 });

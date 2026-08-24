@@ -1,4 +1,4 @@
-import { FLIGHT_CONFIG, PLAYER_SIZE, SCORING_CONFIG } from "./config";
+import { FLIGHT_CONFIG, PLAYER_SIZE, SCORE_POINTS } from "./config";
 import type { World } from "./types";
 
 const PLATFORM_COLOR = "#2f3b52";
@@ -141,7 +141,7 @@ function drawScorePopup(
   const t = clamp(elapsed / POPUP_DURATION_MS, 0, 1);
   const y = baselineY - PLAYER_SIZE.height - t * POPUP_RISE_DISTANCE;
   const alpha = 1 - t;
-  const isCenter = popup.points >= SCORING_CONFIG.centerScore;
+  const isCenter = popup.points >= SCORE_POINTS.centerScore;
 
   ctx.save();
   ctx.font = isCenter ? "bold 16px sans-serif" : "14px sans-serif";
