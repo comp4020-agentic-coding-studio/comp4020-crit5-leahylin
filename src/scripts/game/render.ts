@@ -22,6 +22,7 @@ const POPUP_DURATION_MS = 650; // how long a "+2"/"+1" stays visible after landi
 const POPUP_RISE_DISTANCE = 34;
 const POPUP_CENTER_COLOR = "255, 214, 102"; // brighter/warmer for a precise landing
 const POPUP_EDGE_COLOR = "230, 230, 230";
+const COMBO_LABEL_OFFSET = 14; // sits just above the points text, same fade
 
 export function draw(
   ctx: CanvasRenderingContext2D,
@@ -142,12 +143,22 @@ function drawScorePopup(
   const y = baselineY - PLAYER_SIZE.height - t * POPUP_RISE_DISTANCE;
   const alpha = 1 - t;
   const isCenter = popup.points >= SCORE_POINTS.centerScore;
+  const screenX = popup.x - cameraX;
 
   ctx.save();
   ctx.font = isCenter ? "bold 16px sans-serif" : "14px sans-serif";
   ctx.textAlign = "center";
   ctx.fillStyle = `rgba(${isCenter ? POPUP_CENTER_COLOR : POPUP_EDGE_COLOR}, ${alpha})`;
-  ctx.fillText(`+${popup.points}`, popup.x - cameraX, y);
+  ctx.fillText(`+${popup.points}`, screenX, y);
+
+  // Only worth calling out once it's an actual streak (2+) — a bare "+2"
+  // already says "precise", so tagging every single one would be noise.
+  if (popup.combo >= 2) {
+    ctx.font = "11px sans-serif";
+    ctx.fillStyle = `rgba(${POPUP_CENTER_COLOR}, ${alpha * 0.85})`;
+    ctx.fillText(`COMBO ×${popup.combo}`, screenX, y - COMBO_LABEL_OFFSET);
+  }
+
   ctx.restore();
 }
 

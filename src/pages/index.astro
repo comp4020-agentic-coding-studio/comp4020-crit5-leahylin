@@ -39,7 +39,26 @@ import "../styles/styles.css";
       </div>
       <div id="overlay" hidden>
         <p id="overlay-message"></p>
-        <button id="restart" type="button">Restart</button>
+        <p id="overlay-new-best" hidden>New best!</p>
+        <dl id="overlay-stats">
+          <div class="stat">
+            <dt>Score</dt>
+            <dd id="stat-score">0</dd>
+          </div>
+          <div class="stat">
+            <dt>Best</dt>
+            <dd id="stat-best">0</dd>
+          </div>
+          <div class="stat">
+            <dt>Perfect</dt>
+            <dd id="stat-perfect">0</dd>
+          </div>
+          <div class="stat">
+            <dt>Best combo</dt>
+            <dd id="stat-combo">×0</dd>
+          </div>
+        </dl>
+        <button id="restart" type="button">Play again</button>
       </div>
     </main>
     <script src="../scripts/main.ts"></script>

@@ -27,6 +27,9 @@ export function createWorld(mode: DifficultyMode = DEFAULT_MODE, seed: number = 
     flight: null,
     score: 0,
     scorePopup: null,
+    combo: 0,
+    perfectLandings: 0,
+    bestCombo: 0,
   };
 }
 
@@ -80,11 +83,17 @@ export function tick(world: World, nowMs: number): World {
   }
 
   if (outcome === "stayed") {
-    return { ...world, flight: null, playerX: toX };
+    return { ...world, flight: null, playerX: toX, combo: 0 };
   }
 
+  // Points are always a fixed +1 (edge) or +2 (center) — combo is a tracked
+  // streak for mastery/replay value, not a score multiplier (per the brief's
+  // own example: consecutive center landings each still add exactly +2).
   const landedInCenter = accuracy >= CENTER_ACCURACY_THRESHOLDS[world.mode];
   const points = landedInCenter ? SCORE_POINTS.centerScore : SCORE_POINTS.edgeScore;
+  const combo = landedInCenter ? world.combo + 1 : 0;
+  const perfectLandings = landedInCenter ? world.perfectLandings + 1 : world.perfectLandings;
+  const bestCombo = Math.max(world.bestCombo, combo);
   const state = landedIndex === world.platforms.length - 1 ? "WON" : world.state;
 
   return {
@@ -93,7 +102,10 @@ export function tick(world: World, nowMs: number): World {
     playerX: toX,
     platformIndex: landedIndex as number,
     score: world.score + points,
-    scorePopup: { points, x: toX, startMs: nowMs },
+    combo,
+    perfectLandings,
+    bestCombo,
+    scorePopup: { points, combo, x: toX, startMs: nowMs },
     state,
   };
 }

@@ -27,8 +27,11 @@ export type GameState = "START" | "PLAYING" | "WON" | "LOST";
 
 // A "+2"/"+1" fired the instant a landing resolves, purely for the score
 // feedback animation — render.ts fades it out on its own after popupMs.
+// combo is the consecutive-center-landing streak at this landing (0 for an
+// edge landing); render.ts only shows the "COMBO ×N" tag once it's >= 2.
 export interface ScorePopup {
   points: number;
+  combo: number;
   x: number;
   startMs: number;
 }
@@ -43,4 +46,7 @@ export interface World {
   flight: Flight | null;
   score: number;
   scorePopup: ScorePopup | null;
+  combo: number; // consecutive center landings right now; resets on an edge or stayed landing
+  perfectLandings: number; // total center landings this run
+  bestCombo: number; // highest combo streak reached this run
 }

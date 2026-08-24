@@ -107,6 +107,43 @@ main {
   color: #f4f4f4;
 }
 
+#overlay-new-best {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #ffb454;
+}
+
+#overlay-new-best[hidden] {
+  display: none;
+}
+
+#overlay-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.25rem 0;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 9rem;
+}
+
+.stat dt {
+  color: rgba(244, 244, 244, 0.55);
+  font-size: 0.8rem;
+}
+
+.stat dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 #restart {
   padding: 0.6rem 1.5rem;
   border: none;
