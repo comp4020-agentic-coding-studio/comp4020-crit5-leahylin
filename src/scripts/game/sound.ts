@@ -22,6 +22,10 @@ const FAIL_START_HZ = 220;
 const FAIL_END_HZ = 80;
 const FAIL_DURATION_S = 0.28;
 
+const WIN_NOTES_HZ = [523.25, 659.25, 783.99]; // C5, E5, G5 — a short major arpeggio
+const WIN_NOTE_DURATION_S = 0.16;
+const WIN_NOTE_GAP_S = 0.09;
+
 export interface SoundEngine {
   startCharge(): void;
   updateCharge(holdMs: number): void;
@@ -29,6 +33,7 @@ export interface SoundEngine {
   playJump(): void;
   playLand(isCenter: boolean): void;
   playFail(): void;
+  playWin(): void;
 }
 
 const silent: SoundEngine = {
@@ -38,6 +43,7 @@ const silent: SoundEngine = {
   playJump() {},
   playLand() {},
   playFail() {},
+  playWin() {},
 };
 
 export function createSoundEngine(): SoundEngine {
@@ -137,6 +143,26 @@ export function createSoundEngine(): SoundEngine {
 
     playFail() {
       playTone(FAIL_START_HZ, FAIL_END_HZ, FAIL_DURATION_S, MASTER_GAIN, "sawtooth");
+    },
+
+    // A short ascending triad rather than one tone — reads as "celebratory"
+    // without needing to be loud or long (kept at MASTER_GAIN, same as everything else).
+    playWin() {
+      const audio = ensureContext();
+      WIN_NOTES_HZ.forEach((freq, i) => {
+        const startAt = audio.currentTime + i * WIN_NOTE_GAP_S;
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, startAt);
+        gain.gain.setValueAtTime(0, startAt);
+        gain.gain.linearRampToValueAtTime(MASTER_GAIN, startAt + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, startAt + WIN_NOTE_DURATION_S);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(startAt);
+        osc.stop(startAt + WIN_NOTE_DURATION_S + 0.02);
+      });
     },
   };
 }

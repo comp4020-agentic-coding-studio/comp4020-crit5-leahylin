@@ -1,4 +1,5 @@
 import { CENTER_ACCURACY_THRESHOLDS, DEFAULT_MODE, LOGICAL_WIDTH } from "./config";
+import { createConfetti } from "./confetti";
 import { createInput } from "./input";
 import { draw } from "./render";
 import { loadBestScore, saveBestScore } from "./storage";
@@ -8,6 +9,7 @@ import type { DifficultyMode, World } from "./types";
 
 export interface GameElements {
   canvas: HTMLCanvasElement;
+  confettiCanvas: HTMLCanvasElement;
   scoreEl: HTMLElement;
   difficultyEl: HTMLElement;
   overlayEl: HTMLElement;
@@ -23,6 +25,7 @@ export interface GameElements {
 export function init(elements: GameElements): void {
   const {
     canvas,
+    confettiCanvas,
     scoreEl,
     difficultyEl,
     overlayEl,
@@ -38,6 +41,7 @@ export function init(elements: GameElements): void {
   if (!context) return;
   const ctx: CanvasRenderingContext2D = context;
   const sound = createSoundEngine();
+  const confetti = createConfetti(confettiCanvas);
   const difficultyButtons = Array.from(difficultyEl.querySelectorAll<HTMLButtonElement>("button"));
 
   let logicalHeight = LOGICAL_WIDTH;
@@ -80,7 +84,9 @@ export function init(elements: GameElements): void {
     overlayEl.hidden = !ended;
     if (ended) {
       if (!resultsFinalized) finalizeResults();
-      overlayMessageEl.textContent = world.state === "WON" ? "You made it." : "Missed.";
+      const won = world.state === "WON";
+      overlayMessageEl.textContent = won ? "YOU MADE IT!" : "Missed.";
+      overlayMessageEl.classList.toggle("won", won);
       newBestEl.hidden = !isNewBest;
       statScoreEl.textContent = String(world.score);
       statBestEl.textContent = String(bestScore);
@@ -103,6 +109,7 @@ export function init(elements: GameElements): void {
     bestScore = loadBestScore(mode);
     resultsFinalized = false;
     isNewBest = false;
+    confetti.stop();
     syncUI();
   }
 
@@ -136,6 +143,7 @@ export function init(elements: GameElements): void {
     world = createWorld(mode);
     resultsFinalized = false;
     isNewBest = false;
+    confetti.stop();
     syncUI();
   });
 
@@ -147,6 +155,7 @@ export function init(elements: GameElements): void {
     }
 
     const priorFlight = world.flight;
+    const priorState = world.state;
     world = tick(world, now);
 
     if (priorFlight && !world.flight) {
@@ -155,6 +164,13 @@ export function init(elements: GameElements): void {
       } else {
         sound.playFail();
       }
+    }
+
+    // Only the transition into WON — reaching the final platform — fires the
+    // celebration, never an intermediate advance.
+    if (priorState !== "WON" && world.state === "WON") {
+      confetti.burst();
+      sound.playWin();
     }
 
     draw(ctx, world, now, LOGICAL_WIDTH, logicalHeight);

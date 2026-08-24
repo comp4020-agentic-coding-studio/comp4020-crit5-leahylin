@@ -1,6 +1,7 @@
 import { init } from "./game/main";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
+const confettiCanvas = document.querySelector<HTMLCanvasElement>("#confetti");
 const scoreEl = document.querySelector<HTMLElement>("#score");
 const difficultyEl = document.querySelector<HTMLElement>("#difficulty");
 const overlayEl = document.querySelector<HTMLElement>("#overlay");
@@ -14,6 +15,7 @@ const restartBtn = document.querySelector<HTMLButtonElement>("#restart");
 
 if (
   canvas &&
+  confettiCanvas &&
   scoreEl &&
   difficultyEl &&
   overlayEl &&
@@ -27,6 +29,7 @@ if (
 ) {
   init({
     canvas,
+    confettiCanvas,
     scoreEl,
     difficultyEl,
     overlayEl,
