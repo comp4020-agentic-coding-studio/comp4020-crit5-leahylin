@@ -17,8 +17,6 @@ export interface GameElements {
   newBestEl: HTMLElement;
   statScoreEl: HTMLElement;
   statBestEl: HTMLElement;
-  statPerfectEl: HTMLElement;
-  statComboEl: HTMLElement;
   restartBtn: HTMLButtonElement;
 }
 
@@ -33,8 +31,6 @@ export function init(elements: GameElements): void {
     newBestEl,
     statScoreEl,
     statBestEl,
-    statPerfectEl,
-    statComboEl,
     restartBtn,
   } = elements;
   const context = canvas.getContext("2d");
@@ -91,8 +87,6 @@ export function init(elements: GameElements): void {
       newBestEl.hidden = !isNewBest;
       statScoreEl.textContent = String(world.score);
       statBestEl.textContent = String(bestScore);
-      statPerfectEl.textContent = String(world.perfectLandings);
-      statComboEl.textContent = `×${world.bestCombo}`;
     }
 
     difficultyEl.hidden = world.state !== "START";
