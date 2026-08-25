@@ -48,10 +48,11 @@ export const PLAYER_SIZE = { width: 22, height: 22 };
 // resolveJump's accuracy is 1 - |landingX - center| / (width / 2), so
 // accuracy >= threshold is exactly "landing within (1 - threshold) * 50% of
 // the platform's width from its center" — the higher the threshold, the
-// stricter (smaller) the center-scoring zone. Easy ±15%, Medium ±10%, Hard ±5%.
+// stricter (smaller) the center-scoring zone. Same ±5% zone in every mode;
+// difficulty comes from level geometry (LEVEL_CONFIGS), not the scoring zone.
 export const CENTER_ACCURACY_THRESHOLDS: Record<DifficultyMode, number> = {
-  easy: 0.7,
-  medium: 0.8,
+  easy: 0.9,
+  medium: 0.9,
   hard: 0.9,
 };
 

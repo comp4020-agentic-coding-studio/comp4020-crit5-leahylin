@@ -58,9 +58,10 @@ describe("scoring", () => {
     });
   }
 
-  it("makes harder modes require more precision (smaller center-scoring zone)", () => {
-    expect(CENTER_ACCURACY_THRESHOLDS.easy).toBeLessThan(CENTER_ACCURACY_THRESHOLDS.medium);
-    expect(CENTER_ACCURACY_THRESHOLDS.medium).toBeLessThan(CENTER_ACCURACY_THRESHOLDS.hard);
+  it("uses the same center-scoring zone in every mode — difficulty comes from level geometry, not scoring", () => {
+    expect(CENTER_ACCURACY_THRESHOLDS.easy).toBe(0.9);
+    expect(CENTER_ACCURACY_THRESHOLDS.medium).toBe(0.9);
+    expect(CENTER_ACCURACY_THRESHOLDS.hard).toBe(0.9);
   });
 
   describe("combo", () => {
