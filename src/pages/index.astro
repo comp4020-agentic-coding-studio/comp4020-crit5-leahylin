@@ -38,6 +38,20 @@ import "../styles/styles.css";
         <button type="button" class="difficulty-btn" data-mode="medium" aria-pressed="false">Medium</button>
         <button type="button" class="difficulty-btn" data-mode="hard" aria-pressed="false">Hard</button>
       </div>
+      <div id="start-hint" aria-hidden="true" hidden>
+        <span class="key-icon">
+          <span class="key-icon-arrow"></span>
+          <span class="key-icon-key">
+            <svg class="key-icon-key-svg" viewBox="0 0 200 80" aria-hidden="true" focusable="false">
+              <rect x="5" y="5" width="190" height="68" rx="14"></rect>
+              <path d="M22 58 L22 22 Q22 12 32 12 L168 12 Q178 12 178 22 L178 58 Q100 68 22 58 Z"></path>
+              <path d="M22 58 L9 69"></path>
+              <path d="M178 58 L191 69"></path>
+            </svg>
+            <span class="key-icon-label">Space</span>
+          </span>
+        </span>
+      </div>
       <div id="overlay" hidden>
         <p id="overlay-message"></p>
         <p id="overlay-new-best" hidden>New best!</p>
@@ -51,7 +65,7 @@ import "../styles/styles.css";
             <dd id="stat-best">0</dd>
           </div>
         </dl>
-        <button id="restart" type="button">Play again</button>
+        <button id="restart" type="button">Play Again</button>
       </div>
     </main>
     <script src="../scripts/main.ts"></script>

@@ -183,6 +183,100 @@ main {
   background: #ffc478;
 }
 
+#start-hint {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+#start-hint[hidden] {
+  display: none;
+}
+
+.key-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* A CSS-drawn downward arrow pointing at the key below it: a single
+   clip-path shape (stem + chevron head), no image assets. */
+.key-icon-arrow {
+  width: 1.3rem;
+  height: 1.9rem;
+  background: #c0501f;
+  clip-path: polygon(35% 0%, 65% 0%, 65% 50%, 100% 50%, 50% 100%, 0% 50%, 35% 50%);
+  animation: arrow-bounce 1.4s ease-in-out infinite;
+}
+
+@keyframes arrow-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+/* An inline-SVG keycap: an outer rounded rectangle plus an inset top face
+   whose bottom edge bows downward, joined to the outer bottom corners by two
+   short diagonals — the mitre lines are what make it read as a bevelled 3D
+   key rather than two nested boxes. Vector markup, no image assets. */
+.key-icon-key {
+  position: relative;
+  width: 10rem;
+  height: 4rem;
+}
+
+.key-icon-key-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: #fff;
+  stroke: #111;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.key-icon-label {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: system-ui, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #111;
+}
+
+/* Pressed feedback: the whole key assembly taps inward then springs back —
+   same class fires whether Space started the game or triggered a keyboard restart. */
+.key-icon--pressed {
+  animation: key-press 0.22s ease-out;
+}
+
+@keyframes key-press {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.92);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

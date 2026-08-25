@@ -4,6 +4,7 @@ const canvas = document.querySelector<HTMLCanvasElement>("#game");
 const confettiCanvas = document.querySelector<HTMLCanvasElement>("#confetti");
 const scoreEl = document.querySelector<HTMLElement>("#score");
 const difficultyEl = document.querySelector<HTMLElement>("#difficulty");
+const startHintEl = document.querySelector<HTMLElement>("#start-hint");
 const overlayEl = document.querySelector<HTMLElement>("#overlay");
 const overlayMessageEl = document.querySelector<HTMLElement>("#overlay-message");
 const newBestEl = document.querySelector<HTMLElement>("#overlay-new-best");
@@ -16,6 +17,7 @@ if (
   confettiCanvas &&
   scoreEl &&
   difficultyEl &&
+  startHintEl &&
   overlayEl &&
   overlayMessageEl &&
   newBestEl &&
@@ -28,6 +30,7 @@ if (
     confettiCanvas,
     scoreEl,
     difficultyEl,
+    startHintEl,
     overlayEl,
     overlayMessageEl,
     newBestEl,
