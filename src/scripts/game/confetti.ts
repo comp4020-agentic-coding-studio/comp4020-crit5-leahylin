@@ -1,13 +1,18 @@
-// A lightweight canvas particle burst for the win celebration — no library,
+// A lightweight canvas particle effect for the win celebration — no library,
 // just gravity + a little horizontal sway on a handful of rects/circles/
 // triangles. Deliberately its own RAF loop rather than piggybacking on the
-// main game loop: it's a one-shot cosmetic effect with nothing to do with
-// game state, so it starts, runs for DURATION_MS, and cleans up after itself.
+// main game loop: it's a purely cosmetic effect with nothing to do with game
+// state. It runs until stop() — the celebration holds for as long as the win
+// screen is up, and restarting (which already calls stop) is what ends it.
 
-const DURATION_MS = 3200;
 const GRAVITY_PX_PER_S2 = 780;
 const SWAY_PX_PER_S = 40;
-const PARTICLES_PER_BURST = 16;
+const PARTICLES_PER_BURST = 16; // the opening pop, per origin
+// Each sustaining wave is deliberately much lighter than the opening burst:
+// enough to keep the screen alive behind the win overlay, not so much that it
+// competes with the score and the Play Again button in front of it.
+const PARTICLES_PER_REFILL = 5;
+const REFILL_INTERVAL_MS = 700;
 const BURST_ORIGINS = 5; // spread across the width so it doesn't read as one single cannon
 
 const COLORS = ["#ffb454", "#ff6b81", "#6bcf7f", "#5aa9e6", "#f7d354", "#c77dff"];
@@ -41,8 +46,8 @@ export function createConfetti(canvas: HTMLCanvasElement): ConfettiEngine {
   let width = 0;
   let height = 0;
   let particles: Particle[] = [];
-  let startMs = 0;
   let lastMs = 0;
+  let nextRefillMs = 0;
   let rafId: number | null = null;
 
   function resize(): void {
@@ -58,13 +63,13 @@ export function createConfetti(canvas: HTMLCanvasElement): ConfettiEngine {
   window.addEventListener("resize", resize);
   resize();
 
-  function spawnParticles(): Particle[] {
+  function spawnParticles(perOrigin: number): Particle[] {
     const spawned: Particle[] = [];
     for (let originIndex = 0; originIndex < BURST_ORIGINS; originIndex++) {
       const originX = ((originIndex + 0.5) / BURST_ORIGINS) * width;
       const originY = height * (0.15 + Math.random() * 0.15);
 
-      for (let i = 0; i < PARTICLES_PER_BURST; i++) {
+      for (let i = 0; i < perOrigin; i++) {
         const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.9; // mostly upward/outward
         const speed = 160 + Math.random() * 220;
         spawned.push({
@@ -119,6 +124,11 @@ export function createConfetti(canvas: HTMLCanvasElement): ConfettiEngine {
     const dtS = Math.min((now - lastMs) / 1000, 0.05); // clamp so a stalled tab can't cause a huge leap
     lastMs = now;
 
+    if (now >= nextRefillMs) {
+      particles.push(...spawnParticles(PARTICLES_PER_REFILL));
+      nextRefillMs = now + REFILL_INTERVAL_MS;
+    }
+
     for (const p of particles) {
       p.vy += GRAVITY_PX_PER_S2 * dtS;
       p.x += p.vx * dtS + Math.sin(now / 350 + p.swayPhase) * SWAY_PX_PER_S * dtS;
@@ -130,19 +140,18 @@ export function createConfetti(canvas: HTMLCanvasElement): ConfettiEngine {
     ctx.clearRect(0, 0, width, height);
     for (const p of particles) drawParticle(p);
 
-    const elapsed = now - startMs;
-    if (particles.length > 0 && elapsed < DURATION_MS) {
-      rafId = requestAnimationFrame(loop);
-    } else {
-      stop();
-    }
+    // No time limit: only stop() ends this, so the celebration lasts exactly
+    // as long as the win screen it belongs to. Particles that fall off the
+    // bottom are culled above, so the array stays bounded however long it runs.
+    rafId = requestAnimationFrame(loop);
   }
 
   return {
     burst() {
       stop();
-      particles = spawnParticles();
-      startMs = lastMs = performance.now();
+      particles = spawnParticles(PARTICLES_PER_BURST);
+      lastMs = performance.now();
+      nextRefillMs = lastMs + REFILL_INTERVAL_MS;
       rafId = requestAnimationFrame(loop);
     },
     stop,
