@@ -357,3 +357,42 @@ main {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
 }
+
+/* Below this width, #hud (top-left) and #difficulty (top-right) are wide
+   enough together to overlap — shrink both and move the difficulty picker
+   to a bottom-center row instead of fighting for the same corner space. */
+@media (max-width: 600px) {
+  #hud {
+    top: 0.75rem;
+    left: 0.75rem;
+    gap: 1rem;
+    padding: 0.45rem 0.9rem;
+  }
+
+  .hud-stat {
+    font-size: 1.35rem;
+  }
+
+  #difficulty {
+    top: auto;
+    right: auto;
+    bottom: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 0.35rem;
+  }
+
+  .difficulty-btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .key-icon-key {
+    width: 8rem;
+    height: 3.2rem;
+  }
+
+  #overlay {
+    padding: 0 1.25rem;
+  }
+}
