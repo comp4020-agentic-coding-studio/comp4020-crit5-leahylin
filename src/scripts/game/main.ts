@@ -12,6 +12,7 @@ export interface GameElements {
   canvas: HTMLCanvasElement;
   confettiCanvas: HTMLCanvasElement;
   scoreEl: HTMLElement;
+  bestEl: HTMLElement;
   difficultyEl: HTMLElement;
   startHintEl: HTMLElement;
   overlayEl: HTMLElement;
@@ -35,6 +36,7 @@ export function init(elements: GameElements): void {
     canvas,
     confettiCanvas,
     scoreEl,
+    bestEl,
     difficultyEl,
     startHintEl,
     overlayEl,
@@ -127,6 +129,11 @@ export function init(elements: GameElements): void {
 
   function syncUI(): void {
     scoreEl.textContent = String(world.score);
+    // The trophy climbs with you the moment the run passes the stored best,
+    // rather than only catching up on the results screen — so overtaking your
+    // record is visible while it happens. bestScore itself is still only
+    // written by finalizeResults, so an abandoned run never persists.
+    bestEl.textContent = String(Math.max(bestScore, world.score));
 
     const ended = world.state === "WON" || world.state === "LOST";
     overlayEl.hidden = !ended;

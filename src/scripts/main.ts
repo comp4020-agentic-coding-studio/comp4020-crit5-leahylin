@@ -3,6 +3,7 @@ import { init } from "./game/main";
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
 const confettiCanvas = document.querySelector<HTMLCanvasElement>("#confetti");
 const scoreEl = document.querySelector<HTMLElement>("#score");
+const bestEl = document.querySelector<HTMLElement>("#best");
 const difficultyEl = document.querySelector<HTMLElement>("#difficulty");
 const startHintEl = document.querySelector<HTMLElement>("#start-hint");
 const overlayEl = document.querySelector<HTMLElement>("#overlay");
@@ -16,6 +17,7 @@ if (
   canvas &&
   confettiCanvas &&
   scoreEl &&
+  bestEl &&
   difficultyEl &&
   startHintEl &&
   overlayEl &&
@@ -29,6 +31,7 @@ if (
     canvas,
     confettiCanvas,
     scoreEl,
+    bestEl,
     difficultyEl,
     startHintEl,
     overlayEl,

@@ -25,14 +25,40 @@ import "../styles/styles.css";
   <body>
     <header>
       <nav aria-label="Primary">
-        <a href="./">Home</a>
+        <a href="./">Leap</a>
       </nav>
     </header>
+    <!--
+      Icon definitions, drawn once and referenced by <use> wherever a trophy is
+      needed (the live HUD and the results panel), so the two never drift apart.
+      Rendered at zero size; only the <use> instances are visible.
+    -->
+    <svg id="icon-defs" aria-hidden="true" focusable="false">
+      <symbol id="icon-trophy" viewBox="0 0 24 24">
+        <path d="M6.5 3H17.5V8A5.5 5.5 0 0 1 6.5 8Z"></path>
+        <path d="M10.8 13H13.2V17H10.8Z"></path>
+        <path d="M9 17H15L15.8 19.6H8.2Z"></path>
+        <rect x="6.8" y="19.4" width="10.4" height="2.2" rx="1.1"></rect>
+        <path class="icon-trophy-handle" d="M6.5 4.6H4.4V6.6A3.4 3.4 0 0 0 7.4 10"></path>
+        <path class="icon-trophy-handle" d="M17.5 4.6H19.6V6.6A3.4 3.4 0 0 1 16.6 10"></path>
+      </symbol>
+    </svg>
     <main>
       <h1 class="visually-hidden">Leap</h1>
       <canvas id="game" aria-label="Jumping game"></canvas>
       <canvas id="confetti" aria-hidden="true"></canvas>
-      <div id="score" aria-hidden="true">0</div>
+      <div id="hud" aria-hidden="true">
+        <div class="hud-stat">
+          <span class="score-icon score-icon--player"></span>
+          <span id="score">0</span>
+        </div>
+        <div class="hud-stat">
+          <span class="score-icon score-icon--trophy">
+            <svg aria-hidden="true" focusable="false"><use href="#icon-trophy"></use></svg>
+          </span>
+          <span id="best">0</span>
+        </div>
+      </div>
       <div id="difficulty" role="group" aria-label="Difficulty">
         <button type="button" class="difficulty-btn" data-mode="easy" aria-pressed="true">Easy</button>
         <button type="button" class="difficulty-btn" data-mode="medium" aria-pressed="false">Medium</button>
@@ -57,11 +83,19 @@ import "../styles/styles.css";
         <p id="overlay-new-best" hidden>New best!</p>
         <dl id="overlay-stats">
           <div class="stat">
-            <dt>Score</dt>
+            <dt>
+              <span class="score-icon score-icon--player"></span>
+              Score
+            </dt>
             <dd id="stat-score">0</dd>
           </div>
           <div class="stat">
-            <dt>Best</dt>
+            <dt>
+              <span class="score-icon score-icon--trophy">
+                <svg aria-hidden="true" focusable="false"><use href="#icon-trophy"></use></svg>
+              </span>
+              Best
+            </dt>
             <dd id="stat-best">0</dd>
           </div>
         </dl>

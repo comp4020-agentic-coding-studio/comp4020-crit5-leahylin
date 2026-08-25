@@ -49,15 +49,76 @@ main {
   pointer-events: none;
 }
 
-#score {
+/* Score HUD: two icon+number pairs in one pill — the run's score marked by a
+   miniature of the player character itself, and the best score by a trophy, so
+   which number is which needs no label. */
+#hud {
   position: absolute;
-  top: 5rem;
-  left: 6rem;
-  font-size: 3rem;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: 999px;
+  background: rgba(10, 13, 20, 0.5);
+}
+
+.hud-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 2.1rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: rgba(244, 244, 244, 0.9);
-  z-index: 1;
+  color: rgba(244, 244, 244, 0.92);
+}
+
+/* Shared by the live HUD and the results panel, sized by whichever contains
+   it — the same two marks mean the same two numbers in both places. */
+.score-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+}
+
+/* A miniature of the character drawn on the canvas — same fill and same
+   corner-radius ratio (6/22) as PLAYER_COLOR/PLAYER_RADIUS in render.ts, so
+   the icon and the thing you're steering stay visibly the same object. */
+.score-icon--player {
+  background: #ffb454;
+  border-radius: 27%;
+}
+
+.score-icon--trophy {
+  color: #f2c94c;
+}
+
+.score-icon--trophy svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.icon-trophy-handle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+/* The sprite sheet itself is never displayed — only its <use> instances are.
+   Zero-sized and absolutely positioned rather than display:none, which would
+   stop the symbols resolving. */
+#icon-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
 }
 
 #difficulty {
@@ -152,14 +213,25 @@ main {
 
 .stat {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-width: 9rem;
+  min-width: 10rem;
 }
 
 .stat dt {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   color: rgba(244, 244, 244, 0.55);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
+}
+
+/* Sized independently of the label text so the marks stay legible next to
+   0.9rem type, rather than shrinking with it. */
+.stat dt .score-icon {
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .stat dd {
