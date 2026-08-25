@@ -28,9 +28,9 @@ export interface LevelConfig {
 // randomly drawn from at level-generation time — they only ever shift the
 // required hold-time, never the width-derived tolerance window.
 export const LEVEL_CONFIGS: Record<DifficultyMode, LevelConfig> = {
-  easy: { count: 20, widthMin: 50, widthMax: 90, gapMin: 50, gapMax: 90 },
-  medium: { count: 30, widthMin: 40, widthMax: 80, gapMin: 70, gapMax: 120 },
-  hard: { count: 30, widthMin: 30, widthMax: 70, gapMin: 90, gapMax: 140 },
+  easy: { count: 35, widthMin: 50, widthMax: 90, gapMin: 50, gapMax: 90 },
+  medium: { count: 35, widthMin: 40, widthMax: 80, gapMin: 70, gapMax: 120 },
+  hard: { count: 35, widthMin: 30, widthMax: 70, gapMin: 90, gapMax: 140 },
 };
 
 export const DEFAULT_MODE: DifficultyMode = "easy";
