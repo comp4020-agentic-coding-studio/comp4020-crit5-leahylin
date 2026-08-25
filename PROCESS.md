@@ -1,70 +1,29 @@
 # Process overview
 
-<!-- TEMPLATE: this file is a shape to fill in, not a form. Replace everything
-     in it with your own overview, and delete this comment — `pnpm
-     check:evidence` will remind you if it's still here. -->
-
-A reading-guide to how the work came together --- a map to your process, not an
-essay about it. Markers read this file and follow its citations; they don't
-trawl the repo for evidence you didn't point at, so if a moment mattered, cite
-it.
-
-This file is the shape; the course site's
-[assessment page](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#what-you-submit)
-is the requirement, and its
-[word counts](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#word-counts)
-cover every deliverable.
-
 ## What I built
 
-One paragraph: the thing, and the idea behind it.
+**Leap**: a hold-to-charge, release-to-jump platformer. Holding Space or the
+pointer grows a jump; releasing commits it instantly, deciding stayed /
+advanced / skipped / missed at that moment, not by where the character
+happens to land. Easy/Medium/Hard vary only platform width and gap, never
+physics; scoring rewards a precise landing (+2 in a ±5% center zone, +1
+otherwise) and tracks combos and a persistent best. The opening screen has no
+instructions anywhere — a bouncing Space-key icon is the only thing on it, and
+the only thing that reappears after a win or a loss.
 
 ## The moments that mattered
 
-Three or four for an assignment; fewer is fine for a weekly prototype. Keep the
-list short so each moment has room to do all four jobs:
+**1. Landing on your own platform was a loss**
 
-1. **what happened** --- the problem, or the thing that went wrong
-2. **what you did instead of the obvious thing** --- the call you made, and why
-   it beat the obvious one
-3. **how you knew it was right** --- the check you ran, the viewport you looked
-   at, what you read before accepting the diff
-4. **the citation** --- a commit or commit range, a `CLAUDE.md` change, a check
-   that went from red to green, a prompt paired with the commit it produced
+A short jump that landed back on the current platform was originally treated as a miss because `resolveJump` only checked the next platform. Instead of special-casing short holds, I changed the model to distinguish four outcomes: **stayed, advanced, skipped, and missed**. This separated a safe short jump from actually falling into the gap and also made the sequential-platform rule explicit. I knew the change was correct because I tested short, normal, and over-long jumps, and changed the existing test in `spec/jump.test.ts` from expecting `landed === false` to explicitly asserting `outcome === "stayed"`. Commit:[`a6fd825`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-leahylin/commit/a6fd825)
 
-Jobs 2 and 3 are the ones the repo can't tell a reader on its own, so they're
-where the marks are. The strongest moments are the ones where a correction
-landed in the **harness** --- the standards and checks your work has to satisfy
---- rather than in a retry: a rule added to `CLAUDE.md`, a check wired up, an
-attempt thrown away. Retrying until it passes is the routine case, and changing
-what the work runs against is the skilled one.
+**2. A score nobody could see didn't matter**
 
-Cite each moment as a link whose text is the commit hash or range and whose
-target is this repo's commit or compare URL, so a reader clicks straight to the
-evidence:
+The score was visible during play but disappeared behind the WIN/LOSS overlay at the moment it mattered. Instead of only adding the number to the ending message, I made scoring a secondary reason to replay: the results panel shows the final Score, a per-mode Best score, and the player's combo. I persisted Best with `localStorage` because Easy, Medium, and Hard have different scoring conditions. I verified the combo behaviour with `spec/scoring.test.ts`, then manually checked that Best survived a page reload while the current Score reset. Commit:
+[`4d98b1f`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-leahylin/commit/4d98b1f)
 
-- one commit: [`a1b2c3d`](https://github.com/YOUR-ORG/YOUR-REPO/commit/a1b2c3d)
-- a range:
-  [`a1b2c3d...e4f5a6b`](https://github.com/YOUR-ORG/YOUR-REPO/compare/a1b2c3d...e4f5a6b)
+**3. Every level was the exact same level**
 
-To pair a prompt with the commit it produced, quote the prompt (curated, not a
-full transcript) next to the citation:
-
-> the prompt, verbatim
-
-Screenshots are welcome where one carries the verification better than a
-sentence does. Commit the file to this repo and link it with a **relative**
-path, which is what makes it render on GitHub: `![alt text](docs/before.png)`.
-Images don't count towards the word count and don't replace the citation.
-
-## Before you ship
-
-`pnpm check:evidence` verifies your citations resolve to real commits, that a
-reflection entry the marker reads is in `reflections/`, and that your
-`CLAUDE.md` is there --- before a marker ever opens the file. It checks that
-your map is traceable, not that it is good: the marker judges whether your
-small, deliberately chosen set of moments shows real judgement and reflection. A
-green check is not a substitute for that curation.
-
-Images aren't checked: unlike a citation whose SHA doesn't resolve, a broken
-image is visible the moment this file is rendered on GitHub.
+The first version generated the same platform widths and gaps every run, making the later part of the level increasingly memorisable. Instead of randomising everything at once, I changed the generation in stages: first the gaps, then the widths after the reachability check still passed. I kept a bounded regenerate-if-unreachable safeguard so randomness could not create an impossible jump. I verified the fairness constraint with `spec/level-fairness.test.ts` and added `spec/level-randomness.test.ts` to check that generated platforms were not identical. Commits:
+[`a6fd825`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-leahylin/commit/a6fd825),
+[`91bc620`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-leahylin/commit/91bc620)
